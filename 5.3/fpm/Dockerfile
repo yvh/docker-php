@@ -119,7 +119,7 @@ RUN set -xe \
         --enable-zip \
         --with-zlib \
         --with-readline \
-    && sed -ri "s|CFLAGS_CLEAN =\(.\+\)|CFLAGS_CLEAN =\1 -L/usr/lib64 -lstdc++|g" Makefile \
+    && sed -i "s|CFLAGS_CLEAN =\(.\+\)|CFLAGS_CLEAN =\1 -L/usr/lib64 -lstdc++|g" Makefile \
     && make -j"$(nproc)" \
     && make install \
     && { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
