@@ -28,7 +28,7 @@ for VERSION in "${VERSIONS[@]}"; do
         SOURCE_FILES+=("$VERSION/$TARGET/docker-php-source")
     done
     
-    sed -ri '
+    sed -i '
         s|%%TAR_COMPRESSION_FLAG%%|'$TAR_COMPRESSION_FLAG'|;
         s|%%ARCHIVE_EXTENSION%%|'$ARCHIVE_EXTENSION'|;
     ' "${SOURCE_FILES[@]}"
