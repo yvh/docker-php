@@ -1,41 +1,35 @@
 #!/bin/bash
 #set -xe
 
-versions=("$@")
-if [ ${#versions[@]} -eq 0 ]; then
-	versions=(*/)
+VERSIONS=("$@")
+if [ ${#VERSIONS[@]} -eq 0 ]; then
+	VERSIONS=(*/)
 fi
-versions=("${versions[@]%/}")
+VERSIONS=("${VERSIONS[@]%/}")
 
-sourceFiles=()
-for version in "${versions[@]}"; do
-    if [ ! -f "$version/configure" ]
+SOURCE_FILES=()
+for VERSION in "${VERSIONS[@]}"; do
+    if [ ! -f "$VERSION/configure" ]
     then
-        echo "File $version/configure does not exists. Skip version"
+        echo "File $VERSION/configure does not exists. Skip version"
         continue
     fi
     
-    source $version/configure
+    source $VERSION/configure
     
-    for target in \
+    for TARGET in \
 		apache \
         fpm \
 	; do
-        [ -d "$version/$target" ] || continue
-        
-        if [ ! -f "$version/configure" ]
-        then
-            echo "File $version/configure does not exists. Skip version"
-            continue
-        fi
-        
-        cp -v docker-php-ext-* "$version/$target/"                
-        cp -v docker-php-source "$version/$target/"
-        sourceFiles+=("$version/$target/docker-php-source")
+        [ -d "$VERSION/$TARGET" ] || continue
+                
+        cp -v docker-php-ext-* "$VERSION/$TARGET/"                
+        cp -v docker-php-source "$VERSION/$TARGET/"
+        SOURCE_FILES+=("$VERSION/$TARGET/docker-php-source")
     done
     
     sed -ri '
         s|%%TAR_COMPRESSION_FLAG%%|'$TAR_COMPRESSION_FLAG'|;
         s|%%ARCHIVE_EXTENSION%%|'$ARCHIVE_EXTENSION'|;
-    ' "${sourceFiles[@]}"
+    ' "${SOURCE_FILES[@]}"
 done
