@@ -1,8 +1,6 @@
-# Docker-php
+# Custom build of PHP based on the official build for docker.
 
-Custom build of PHP based on the official build for docker.
-
-Please visit the [Docker Hub](https://hub.docker.com/r/yannickvh/php/)
+See repository on [Docker Hub](https://hub.docker.com/r/yannickvh/php/)
 
 # Supported tags and respective `Dockerfile` links
 
