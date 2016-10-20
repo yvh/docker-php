@@ -15,7 +15,7 @@ See repository on [Docker Hub](https://hub.docker.com/r/yannickvh/php/)
 
 # How to use this image
 
-Same way that the [official PHP docker image](https://hub.docker.com/_/php/) but replace `php` image by `yannickvh/php`
+Same use as the [official PHP docker image](https://hub.docker.com/_/php/) but replace `php` image by `yannickvh/php`
 
 # User Feedback
 
