@@ -18,7 +18,7 @@ case "$1" in
 	extract)
 		mkdir -p "$dir"
 		if [ ! -f "$dir/.docker-extracted" ]; then
-			tar -x -J -f /usr/src/php.tar.xz -C "$dir" --strip-components=1
+			tar -x %%TAR_COMPRESSION_FLAG%% -f /usr/src/php.tar%%ARCHIVE_EXTENSION%% -C "$dir" --strip-components=1
 			touch "$dir/.docker-extracted"
 		fi
 		;;
