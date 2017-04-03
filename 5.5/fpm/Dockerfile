@@ -11,7 +11,7 @@ ENV PHPIZE_DEPS \
     make \
     pkg-config \
     re2c
-    
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         $PHPIZE_DEPS \
         ca-certificates \
@@ -53,14 +53,13 @@ ENV PHP_VERSION 5.5.38
 
 COPY docker-php-source /usr/local/bin/
 
-# php 5.3 needs older autoconf
 # --enable-mysqlnd is included below because it's harder to compile after the fact the extensions are (since it's a plugin for several extensions, not an extension in itself)    
 RUN set -xe \
     && cd /usr/src \
     && curl -SsL "http://php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz \
     && curl -SsL "http://php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror" -o php.tar.xz.asc \
     && gpg --verify php.tar.xz.asc
-                
+
 RUN set -xe \
     && PHP_BUILD_DEPS=" \
         libcurl4-openssl-dev \
@@ -125,7 +124,7 @@ RUN set -xe \
     && make clean \
     && docker-php-source delete \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS
-    
+
 COPY docker-php-* /usr/local/bin/
 
 WORKDIR /var/www/html
