@@ -59,7 +59,7 @@ RUN set -ex \
 RUN set -ex \
     && a2dismod mpm_event \
     && a2enmod mpm_prefork rewrite
-    
+
 RUN set -ex \
     && echo "ServerName localhost" > /etc/apache2/conf-available/fqdn.conf \
     && a2enconf fqdn
@@ -108,7 +108,7 @@ RUN { \
 	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
 	&& a2enconf docker-php
 
-ENV PHP_VERSION 5.6.27
+ENV PHP_VERSION 5.6.30
 
 COPY docker-php-source /usr/local/bin/
 
