@@ -95,6 +95,16 @@ RUN { \
 	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
 	&& a2enconf docker-php
 
+# Apply stack smash protection to functions using local buffers and alloca()
+# Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
+# Enable optimization (-O2)
+# Enable linker optimization (this sorts the hash buckets to improve cache locality, and is non-default)
+# Adds GNU HASH segments to generated executables (this is used if present, and is much faster than sysv hash; in this configuration, sysv hash is also generated)
+# https://github.com/docker-library/php/issues/272
+ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
+ENV PHP_CPPFLAGS="$PHP_CFLAGS"
+ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
+
 ENV PHP_VERSION 5.6.30
 
 COPY docker-php-source /usr/local/bin/
@@ -121,6 +131,9 @@ RUN set -xe \
     && apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
+    && export CFLAGS="$PHP_CFLAGS" \
+		CPPFLAGS="$PHP_CPPFLAGS" \
+		LDFLAGS="$PHP_LDFLAGS" \
     && . "$APACHE_ENVVARS" \
     && docker-php-source extract \
     && cd /usr/src/php \
