@@ -59,7 +59,7 @@ RUN set -ex \
 RUN set -ex \
     && a2dismod mpm_event \
     && a2enmod mpm_prefork rewrite
-    
+
 RUN set -ex \
     && echo "ServerName localhost" > /etc/apache2/conf-available/fqdn.conf \
     && a2enconf fqdn
@@ -74,24 +74,11 @@ RUN set -ex \
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
 
-ENV GPG_KEYS F38252826ACD957EF380D39F2F7956BC5DA04B5D 8657ABB260F056B1E5190839D9C4D26D0E604491
+ENV GPG_KEYS F38252826ACD957EF380D39F2F7956BC5DA04B5D
 RUN set -xe \
     && for key in $GPG_KEYS; do \
         gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
     done
-    
-# compile openssl, otherwise --with-openssl won't work
-RUN set -ex \
-    && OPENSSL_VERSION="1.0.2j" \
-    && cd /tmp \
-    && mkdir openssl \
-    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
-    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
-    && gpg --verify openssl.tar.gz.asc \
-    && tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
-    && cd /tmp/openssl \
-    && ./config && make && make install \
-    && rm -rf /tmp/*
 
 RUN { \
         echo '<FilesMatch \.php$>'; \
