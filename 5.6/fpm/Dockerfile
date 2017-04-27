@@ -30,24 +30,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
 
-ENV GPG_KEYS 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3 0BD78B5F97500D450838F95DFE857D9A90D90EC1 8657ABB260F056B1E5190839D9C4D26D0E604491
+ENV GPG_KEYS 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3 0BD78B5F97500D450838F95DFE857D9A90D90EC1
 RUN set -xe \
     && for key in $GPG_KEYS; do \
         gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
     done
-
-# compile openssl, otherwise --with-openssl won't work
-RUN set -xe \
-    && OPENSSL_VERSION="1.0.2j" \
-    && cd /tmp \
-    && mkdir openssl \
-    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
-    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
-    && gpg --verify openssl.tar.gz.asc \
-    && tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
-    && cd /tmp/openssl \
-    && ./config && make && make install \
-    && rm -rf /tmp/*
 
 ENV PHP_VERSION 5.6.30
 
