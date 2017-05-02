@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
 
-ENV GPG_KEYS 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3 0BD78B5F97500D450838F95DFE857D9A90D90EC1
+ENV GPG_KEYS 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3 0BD78B5F97500D450838F95DFE857D9A90D90EC1 8657ABB260F056B1E5190839D9C4D26D0E604491
 RUN set -xe \
     && for key in $GPG_KEYS; do \
         gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
@@ -45,12 +45,10 @@ RUN set -xe \
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-
 ENV PHP_VERSION 5.6.30
 
 COPY docker-php-source /usr/local/bin/
 
-# --enable-mysqlnd is included below because it's harder to compile after the fact the extensions are (since it's a plugin for several extensions, not an extension in itself)
 RUN set -xe \
     && cd /usr/src \
     && curl -SsL "http://php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz \
@@ -101,7 +99,7 @@ RUN set -xe \
         --with-mysql \
         --with-mysqli=mysqlnd \
         --enable-mysqlnd \
-        --with-openssl \
+        --with-openssl=/usr/local/ssl \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
         --with-pdo-sqlite \
