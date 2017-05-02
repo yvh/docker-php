@@ -64,8 +64,8 @@ COPY docker-php-source /usr/local/bin/
 
 RUN set -xe \
     && cd /usr/src \
-    && curl -SsL "http://php.net/get/php-$PHP_VERSION.tar.bz2/from/this/mirror" -o php.tar.bz2 \
-    && curl -SsL "http://php.net/get/php-$PHP_VERSION.tar.bz2.asc/from/this/mirror" -o php.tar.bz2.asc \
+    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.bz2/from/this/mirror" -o php.tar.bz2 \
+    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.bz2.asc/from/this/mirror" -o php.tar.bz2.asc \
     && gpg --verify php.tar.bz2.asc
 
 RUN set -xe \

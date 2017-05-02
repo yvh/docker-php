@@ -123,8 +123,8 @@ COPY docker-php-source /usr/local/bin/
 
 RUN set -xe \
     && cd /usr/src \
-    && curl -SsL "http://php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz \
-    && curl -SsL "http://php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror" -o php.tar.xz.asc \
+    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz \
+    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror" -o php.tar.xz.asc \
     && gpg --verify php.tar.xz.asc
 
 RUN set -xe \
