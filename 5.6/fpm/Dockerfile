@@ -36,6 +36,19 @@ RUN set -xe \
         gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
     done
 
+# compile openssl, otherwise --with-openssl won't work
+RUN set -ex \
+    && OPENSSL_VERSION="1.0.2k" \
+    && cd /tmp \
+    && mkdir openssl \
+    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
+    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
+    && gpg --verify openssl.tar.gz.asc \
+    && tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
+    && cd /tmp/openssl \
+    && ./config -fPIC && make && make install \
+    && rm -rf /tmp/*
+
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
 # Enable optimization (-O2)
