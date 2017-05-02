@@ -14,21 +14,21 @@ for VERSION in "${VERSIONS[@]}"; do
         echo "File $VERSION/configure does not exists. Skip version"
         continue
     fi
-    
+
     source $VERSION/configure
-    
+
     for TARGET in \
 		apache \
         fpm \
 	; do
         [ -d "$VERSION/$TARGET" ] || continue
-                
-        cp -v docker-php-ext-* "$VERSION/$TARGET/"                
+
+        cp -v docker-php-ext-* "$VERSION/$TARGET/"
         cp -v docker-php-source "$VERSION/$TARGET/"
         SOURCE_FILES+=("$VERSION/$TARGET/docker-php-source")
     done
-    
-    sed -i '
+
+    sed -i '' '
         s|%%TAR_COMPRESSION_FLAG%%|'$TAR_COMPRESSION_FLAG'|;
         s|%%ARCHIVE_EXTENSION%%|'$ARCHIVE_EXTENSION'|;
     ' "${SOURCE_FILES[@]}"
