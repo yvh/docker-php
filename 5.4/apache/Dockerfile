@@ -64,22 +64,6 @@ RUN set -ex \
     && echo "ServerName localhost" > /etc/apache2/conf-available/fqdn.conf \
     && a2enconf fqdn
 
-# logs should go to stdout / stderr
-RUN set -ex \
-	&& . "$APACHE_ENVVARS" \
-	&& ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/other_vhosts_access.log"
-
-ENV PHP_INI_DIR /usr/local/etc/php
-RUN mkdir -p $PHP_INI_DIR/conf.d
-
-ENV GPG_KEYS F38252826ACD957EF380D39F2F7956BC5DA04B5D
-RUN set -xe \
-    && for key in $GPG_KEYS; do \
-        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-    done
-
 RUN { \
         echo '<FilesMatch \.php$>'; \
 		echo '\tSetHandler application/x-httpd-php'; \
@@ -95,6 +79,35 @@ RUN { \
 	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
 	&& a2enconf docker-php
 
+# logs should go to stdout / stderr
+RUN set -ex \
+	&& . "$APACHE_ENVVARS" \
+	&& ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log" \
+	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log" \
+	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/other_vhosts_access.log"
+
+ENV PHP_INI_DIR /usr/local/etc/php
+RUN mkdir -p $PHP_INI_DIR/conf.d
+
+ENV GPG_KEYS F38252826ACD957EF380D39F2F7956BC5DA04B5D 8657ABB260F056B1E5190839D9C4D26D0E604491
+RUN set -xe \
+    && for key in $GPG_KEYS; do \
+        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+    done
+
+# compile openssl, otherwise --with-openssl won't work
+RUN set -ex \
+    && OPENSSL_VERSION="1.0.2k" \
+    && cd /tmp \
+    && mkdir openssl \
+    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
+    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
+    && gpg --verify openssl.tar.gz.asc \
+    && tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
+    && cd /tmp/openssl \
+    && ./config -fPIC && make && make install \
+    && rm -rf /tmp/*
+
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
 # Enable optimization (-O2)
@@ -104,7 +117,6 @@ RUN { \
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-
 ENV PHP_VERSION 5.4.45
 
 COPY docker-php-source /usr/local/bin/
@@ -159,7 +171,7 @@ RUN set -xe \
         --with-mysql \
         --with-mysqli=mysqlnd \
         --enable-mysqlnd \
-        --with-openssl \
+        --with-openssl=/usr/local/ssl \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
         --with-pdo-sqlite \
