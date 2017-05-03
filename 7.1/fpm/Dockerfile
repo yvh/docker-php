@@ -1,9 +1,6 @@
 FROM debian:jessie
 MAINTAINER Yannick Vanhaeren
 
-ENV http_proxy "http://EXK640:Hrrail001$@proxy:80"
-ENV https_proxy $http_proxy
-
 # persistent / runtime deps
 ENV PHPIZE_DEPS \
     autoconf \
