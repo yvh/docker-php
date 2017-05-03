@@ -46,7 +46,7 @@ RUN set -ex \
     && gpg --verify openssl.tar.gz.asc \
     && tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
     && cd /tmp/openssl \
-    && ./config && make && make install \
+    && ./config -fPIC && make && make install \
     && rm -rf /tmp/*
 
 # Apply stack smash protection to functions using local buffers and alloca()
