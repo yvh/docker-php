@@ -38,7 +38,7 @@ RUN set -xe \
 
 # compile openssl, otherwise --with-openssl won't work
 RUN set -ex \
-    && OPENSSL_VERSION="1.0.2k" \
+    && OPENSSL_VERSION="1.0.2l" \
     && cd /tmp \
     && mkdir openssl \
     && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
