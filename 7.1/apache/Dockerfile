@@ -1,5 +1,5 @@
-FROM debian:jessie
-MAINTAINER Yannick Vanhaeren
+FROM debian:stretch
+LABEL maintainer="Yannick Vanhaeren"
 
 # persistent / runtime deps
 ENV PHPIZE_DEPS \
@@ -17,15 +17,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         librecode0 \
-        libmysqlclient-dev \
+        default-libmysqlclient-dev \
         libsqlite3-0 \
         libxml2 \
         xz-utils \
-        libicu52 \
+        libicu57 \
         libbz2-1.0 \
         libxslt1.1 \
         apache2-bin \
-        apache2.2-common \
+        apache2 \
+        gnupg \
+        dirmngr \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
@@ -147,6 +149,7 @@ RUN set -xe \
 		CPPFLAGS="$PHP_CPPFLAGS" \
 		LDFLAGS="$PHP_LDFLAGS" \
     && . "$APACHE_ENVVARS" \
+    && ln -s  /usr/include/x86_64-linux-gnu/curl  /usr/include/curl \
     && docker-php-source extract \
     && cd /usr/src/php \
     && ./configure \
