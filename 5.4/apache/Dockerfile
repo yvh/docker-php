@@ -1,5 +1,5 @@
 FROM debian:jessie
-MAINTAINER Yannick Vanhaeren
+LABEL maintainer="Yannick Vanhaeren"
 
 # persistent / runtime deps
 ENV PHPIZE_DEPS \
