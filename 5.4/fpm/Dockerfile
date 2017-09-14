@@ -30,20 +30,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
 
-ENV GPG_KEYS F38252826ACD957EF380D39F2F7956BC5DA04B5D 8657ABB260F056B1E5190839D9C4D26D0E604491
-RUN set -xe \
-    && for key in $GPG_KEYS; do \
-        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-    done
-
 # compile openssl, otherwise --with-openssl won't work
 RUN set -ex \
     && OPENSSL_VERSION="1.0.2l" \
     && cd /tmp \
     && mkdir openssl \
     && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
-    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
-    && gpg --verify openssl.tar.gz.asc \
     && tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
     && cd /tmp/openssl \
     && ./config -fPIC && make && make install \
@@ -64,9 +56,7 @@ COPY docker-php-source /usr/local/bin/
 
 RUN set -xe \
     && cd /usr/src \
-    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.bz2/from/this/mirror" -o php.tar.bz2 \
-    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.bz2.asc/from/this/mirror" -o php.tar.bz2.asc \
-    && gpg --verify php.tar.bz2.asc
+    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.bz2/from/this/mirror" -o php.tar.bz2
 
 RUN set -xe \
     && PHP_BUILD_DEPS=" \

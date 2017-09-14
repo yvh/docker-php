@@ -24,19 +24,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libicu57 \
         libbz2-1.0 \
         libxslt1.1 \
-        gnupg \
-        dirmngr \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
-
-ENV GPG_KEYS A917B1ECDA84AEC2B568FED6F50ABC807BD5DCD0 528995BFEDFBA7191D46839EF9BA0ADA31CBD89E 8657ABB260F056B1E5190839D9C4D26D0E604491
-RUN set -xe \
-    && for key in $GPG_KEYS; do \
-        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-    done
 
 # compile openssl, otherwise --with-openssl won't work
 RUN set -ex \
@@ -44,8 +36,6 @@ RUN set -ex \
     && cd /tmp \
     && mkdir openssl \
     && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
-    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
-    && gpg --verify openssl.tar.gz.asc \
     && tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
     && cd /tmp/openssl \
     && ./config -fPIC && make && make install \
@@ -66,9 +56,7 @@ COPY docker-php-source /usr/local/bin/
 
 RUN set -xe \
     && cd /usr/src \
-    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz \
-    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror" -o php.tar.xz.asc \
-    && gpg --verify php.tar.xz.asc
+    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz
 
 RUN set -xe \
     && PHP_BUILD_DEPS=" \
