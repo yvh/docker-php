@@ -50,7 +50,7 @@ RUN set -ex \
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-ENV PHP_VERSION 7.1.12
+ENV PHP_VERSION 7.1.13
 
 COPY docker-php-source /usr/local/bin/
 
