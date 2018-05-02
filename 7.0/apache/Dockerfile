@@ -90,7 +90,7 @@ RUN mkdir -p $PHP_INI_DIR/conf.d
 
 # compile openssl, otherwise --with-openssl won't work
 RUN set -ex \
-    && OPENSSL_VERSION="1.0.2l" \
+    && OPENSSL_VERSION="1.1.0h" \
     && cd /tmp \
     && mkdir openssl \
     && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
@@ -108,7 +108,7 @@ RUN set -ex \
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-ENV PHP_VERSION 7.0.27
+ENV PHP_VERSION 7.0.30
 
 COPY docker-php-source /usr/local/bin/
 
