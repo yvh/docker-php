@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         xz-utils \
         libicu57 \
         libbz2-1.0 \
-        libxslt1.1 \0
+        libxslt1.1 \
         apache2-bin \
         apache2 \
     && apt-get clean \
