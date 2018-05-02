@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         xz-utils \
         libicu57 \
         libbz2-1.0 \
-        libxslt1.1 \
+        libxslt1.1 \0
         apache2-bin \
         apache2 \
     && apt-get clean \
@@ -90,7 +90,7 @@ RUN mkdir -p $PHP_INI_DIR/conf.d
 
 # compile openssl, otherwise --with-openssl won't work
 RUN set -ex \
-    && OPENSSL_VERSION="1.0.2l" \
+    && OPENSSL_VERSION="1.1.0h" \
     && cd /tmp \
     && mkdir openssl \
     && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
@@ -108,7 +108,7 @@ RUN set -ex \
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-ENV PHP_VERSION 7.1.13
+ENV PHP_VERSION 7.1.17
 
 COPY docker-php-source /usr/local/bin/
 
