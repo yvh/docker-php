@@ -1,5 +1,6 @@
-#!/bin/bash
-#set -xe
+#!/usr/bin/env bash
+
+set -xe
 
 VERSIONS=("$@")
 if [ ${#VERSIONS[@]} -eq 0 ]; then
@@ -19,7 +20,7 @@ for VERSION in "${VERSIONS[@]}"; do
 
     for TARGET in \
 		apache \
-        fpm \
+		fpm \
 	; do
         [ -d "$VERSION/$TARGET" ] || continue
 
