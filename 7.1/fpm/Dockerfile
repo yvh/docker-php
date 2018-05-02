@@ -30,17 +30,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
 
-# compile openssl, otherwise --with-openssl won't work
-RUN set -ex \
-    && OPENSSL_VERSION="1.1.0h" \
-    && cd /tmp \
-    && mkdir openssl \
-    && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
-    && tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
-    && cd /tmp/openssl \
-    && ./config -fPIC && make && make install \
-    && rm -rf /tmp/*
-
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
 # Enable optimization (-O2)
@@ -103,7 +92,7 @@ RUN set -xe \
         --with-mysql \
         --with-mysqli=mysqlnd \
         --enable-mysqlnd \
-        --with-openssl=/usr/local/ssl \
+        --with-openssl \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
         --with-pdo-sqlite \
