@@ -4,7 +4,7 @@ set -xe
 
 VERSIONS=("$@")
 if [ ${#VERSIONS[@]} -eq 0 ]; then
-	VERSIONS=(*/)
+    VERSIONS=(*/)
 fi
 VERSIONS=("${VERSIONS[@]%/}")
 
@@ -19,9 +19,9 @@ for VERSION in "${VERSIONS[@]}"; do
     source $VERSION/configure
 
     for TARGET in \
-		apache \
-		fpm \
-	; do
+        apache \
+        fpm \
+    ; do
         [ -d "$VERSION/$TARGET" ] || continue
 
         cp -v docker-php-ext-* "$VERSION/$TARGET/"
