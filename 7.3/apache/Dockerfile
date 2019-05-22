@@ -171,6 +171,7 @@ RUN set -xe \
     && make install \
     && { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
     && make clean \
+    && cp /usr/src/php/php.ini-production /usr/local/etc/php/php.ini \
     && docker-php-source delete \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS
 
