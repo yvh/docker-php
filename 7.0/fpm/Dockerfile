@@ -63,8 +63,8 @@ RUN set -xe \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && export CFLAGS="$PHP_CFLAGS" \
-		CPPFLAGS="$PHP_CPPFLAGS" \
-		LDFLAGS="$PHP_LDFLAGS" \
+    CPPFLAGS="$PHP_CPPFLAGS" \
+    LDFLAGS="$PHP_LDFLAGS" \
     && ln -s  /usr/include/x86_64-linux-gnu/curl  /usr/include/curl \
     && docker-php-source extract \
     && cd /usr/src/php \

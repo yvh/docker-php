@@ -33,27 +33,27 @@ ENV APACHE_CONFDIR /etc/apache2
 ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
 
 RUN set -ex \
-	\
+  \
 # generically convert lines like
 #   export APACHE_RUN_USER=www-data
 # into
 #   : ${APACHE_RUN_USER:=www-data}
 #   export APACHE_RUN_USER
 # so that they can be overridden at runtime ("-e APACHE_RUN_USER=...")
-	&& sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' "$APACHE_ENVVARS" \
-	\
+  && sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' "$APACHE_ENVVARS" \
+  \
 # setup directories and permissions
-	&& . "$APACHE_ENVVARS" \
-	&& for dir in \
-		"$APACHE_LOCK_DIR" \
-		"$APACHE_RUN_DIR" \
-		"$APACHE_LOG_DIR" \
-		/var/www/html \
-	; do \
-		rm -rvf "$dir" \
-		&& mkdir -p "$dir" \
-		&& chown -R "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$dir"; \
-	done
+  && . "$APACHE_ENVVARS" \
+  && for dir in \
+    "$APACHE_LOCK_DIR" \
+    "$APACHE_RUN_DIR" \
+    "$APACHE_LOG_DIR" \
+    /var/www/html \
+  ; do \
+    rm -rvf "$dir" \
+    && mkdir -p "$dir" \
+    && chown -R "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$dir"; \
+  done
 
 # Apache + PHP requires preforking Apache for best results
 RUN set -ex \
@@ -66,24 +66,24 @@ RUN set -ex \
 
 RUN { \
         echo '<FilesMatch \.php$>'; \
-		echo '\tSetHandler application/x-httpd-php'; \
-		echo '</FilesMatch>'; \
-		echo; \
-		echo 'DirectoryIndex disabled'; \
-		echo 'DirectoryIndex index.php index.html'; \
-		echo; \
-		echo '<Directory /var/www/>'; \
-		echo '\tOptions -Indexes'; \
-		echo '\tAllowOverride All'; \
-		echo '</Directory>'; \
-	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
-	&& a2enconf docker-php
+    echo '\tSetHandler application/x-httpd-php'; \
+    echo '</FilesMatch>'; \
+    echo; \
+    echo 'DirectoryIndex disabled'; \
+    echo 'DirectoryIndex index.php index.html'; \
+    echo; \
+    echo '<Directory /var/www/>'; \
+    echo '\tOptions -Indexes'; \
+    echo '\tAllowOverride All'; \
+    echo '</Directory>'; \
+  } | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
+  && a2enconf docker-php
 
 # logs should go to stdout / stderr
 RUN set -ex \
-	&& . "$APACHE_ENVVARS" \
-	&& ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log"
+  && . "$APACHE_ENVVARS" \
+  && ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log" \
+  && ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log"
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
@@ -133,8 +133,8 @@ RUN set -xe \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && export CFLAGS="$PHP_CFLAGS" \
-		CPPFLAGS="$PHP_CPPFLAGS" \
-		LDFLAGS="$PHP_LDFLAGS" \
+    CPPFLAGS="$PHP_CPPFLAGS" \
+    LDFLAGS="$PHP_LDFLAGS" \
     && . "$APACHE_ENVVARS" \
     && docker-php-source extract \
     && cd /usr/src/php \

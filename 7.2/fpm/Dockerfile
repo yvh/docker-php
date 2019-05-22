@@ -4,11 +4,11 @@ LABEL maintainer="Yannick Vanhaeren"
 # prevent Debian's PHP packages from being installed
 # https://github.com/docker-library/php/pull/542
 RUN set -eux; \
-  	{ \
-				echo 'Package: php*'; \
-				echo 'Pin: release *'; \
-				echo 'Pin-Priority: -1'; \
-		} > /etc/apt/preferences.d/no-debian-php
+    { \
+        echo 'Package: php*'; \
+        echo 'Pin: release *'; \
+        echo 'Pin-Priority: -1'; \
+    } > /etc/apt/preferences.d/no-debian-php
 
 # persistent / runtime deps
 ENV PHPIZE_DEPS \
@@ -23,27 +23,27 @@ ENV PHPIZE_DEPS \
     re2c
 
 RUN set -eux; \
-		apt-get update && apt-get install -y --no-install-recommends \
-				$PHPIZE_DEPS \
-				ca-certificates \
-				curl \
-				librecode0 \
-				default-libmysqlclient-dev \
-				libsqlite3-0 \
-				libxml2 \
-				libzip4 \
-				libedit2 \
-				libsodium18 \
-				xz-utils \
-				libicu57 \
-				libbz2-1.0 \
-				libxslt1.1; \
+    apt-get update && apt-get install -y --no-install-recommends \
+        $PHPIZE_DEPS \
+        ca-certificates \
+        curl \
+        librecode0 \
+        default-libmysqlclient-dev \
+        libsqlite3-0 \
+        libxml2 \
+        libzip4 \
+        libedit2 \
+        libsodium18 \
+        xz-utils \
+        libicu57 \
+        libbz2-1.0 \
+        libxslt1.1; \
     apt-get clean; \
     rm -r /var/lib/apt/lists/*
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
-		mkdir -p $PHP_INI_DIR/conf.d
+    mkdir -p $PHP_INI_DIR/conf.d
 
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
@@ -63,48 +63,48 @@ RUN set -eux; \
     curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz
 
 ENV PHP_BUILD_DEPS \
-		libcurl4-openssl-dev \
-		libreadline6-dev \
-		librecode-dev \
-		libsqlite3-dev \
-		libssl-dev \
-		libxml2-dev \
-		libicu-dev \
-		libbz2-dev \
-		libxslt-dev \
-		libedit-dev \
-		libzip-dev \
-		zlib1g-dev \
-		libsodium-dev
+    libcurl4-openssl-dev \
+    libreadline6-dev \
+    librecode-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    libxml2-dev \
+    libicu-dev \
+    libbz2-dev \
+    libxslt-dev \
+    libedit-dev \
+    libzip-dev \
+    zlib1g-dev \
+    libsodium-dev
 
 RUN set -eux; \
     apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends; \
 ##<argon2>##
-		sed -e 's/stretch/buster/g' /etc/apt/sources.list > /etc/apt/sources.list.d/buster.list; \
-		{ \
-				echo 'Package: *'; \
-				echo 'Pin: release n=buster'; \
-				echo 'Pin-Priority: -10'; \
-				echo; \
-				echo 'Package: libargon2*'; \
-				echo 'Pin: release n=buster'; \
-				echo 'Pin-Priority: 990'; \
-		} > /etc/apt/preferences.d/argon2-buster; \
-		apt-get update; \
-		apt-get install -y --no-install-recommends libargon2-dev; \
+    sed -e 's/stretch/buster/g' /etc/apt/sources.list > /etc/apt/sources.list.d/buster.list; \
+    { \
+        echo 'Package: *'; \
+        echo 'Pin: release n=buster'; \
+        echo 'Pin-Priority: -10'; \
+        echo; \
+        echo 'Package: libargon2*'; \
+        echo 'Pin: release n=buster'; \
+        echo 'Pin-Priority: 990'; \
+    } > /etc/apt/preferences.d/argon2-buster; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends libargon2-dev; \
 ##</argon2>##
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \
     export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS"; \
-		if [ ! -d /usr/include/curl ]; then \
-				ln -sT /usr/include/x86_64-linux-gnu/curl /usr/local/include/curl; \
-	  fi; \
+    if [ ! -d /usr/include/curl ]; then \
+        ln -sT /usr/include/x86_64-linux-gnu/curl /usr/local/include/curl; \
+    fi; \
     docker-php-source extract; \
     cd /usr/src/php; \
     ./configure \
         --with-config-file-path="$PHP_INI_DIR" \
         --with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
-				--enable-option-checking=fatal \
+        --enable-option-checking=fatal \
         --enable-fpm \
         --with-fpm-user=www-data \
         --with-fpm-group=www-data \
@@ -116,8 +116,8 @@ RUN set -eux; \
         --enable-dom \
         --enable-fileinfo \
         --enable-filter \
-				--enable-ftp \
-				--with-libedit \
+        --enable-ftp \
+        --with-libedit \
         --with-mhash \
         --with-iconv \
         --enable-intl \
@@ -127,8 +127,8 @@ RUN set -eux; \
         --enable-mbregex \
         --with-mysqli=mysqlnd \
         --enable-mysqlnd \
-				--with-password-argon2 \
-				--with-sodium \
+        --with-password-argon2 \
+        --with-sodium \
         --with-openssl \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
@@ -154,8 +154,8 @@ RUN set -eux; \
     docker-php-source delete; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS; \
 # https://github.com/docker-library/php/issues/443
-		pecl update-channels; \
-		rm -rf /tmp/pear ~/.pearrc
+    pecl update-channels; \
+    rm -rf /tmp/pear ~/.pearrc
 
 COPY docker-php-* /usr/local/bin/
 

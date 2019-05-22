@@ -5,8 +5,8 @@ LABEL maintainer="Yannick Vanhaeren"
 # https://github.com/docker-library/php/pull/542
 RUN set -eux; \
     { \
-    		echo 'Package: php*'; \
-	      echo 'Pin: release *'; \
+        echo 'Package: php*'; \
+        echo 'Pin: release *'; \
         echo 'Pin-Priority: -1'; \
     } > /etc/apt/preferences.d/no-debian-php
 
@@ -32,7 +32,7 @@ RUN set -eux; \
         libsqlite3-0 \
         libxml2 \
         libzip4 \
-				libedit2 \
+        libedit2 \
         libsodium18 \
         xz-utils \
         libicu57 \
@@ -60,12 +60,12 @@ RUN set -eux; \
     . "$APACHE_ENVVARS"; \
     for dir in \
         "$APACHE_LOCK_DIR" \
-		    "$APACHE_RUN_DIR" \
-		    "$APACHE_LOG_DIR" \
-		    /var/www/html \
+        "$APACHE_RUN_DIR" \
+        "$APACHE_LOG_DIR" \
+        /var/www/html \
     ; do \
         rm -rvf "$dir"; \
-		    mkdir -p "$dir"; \
+        mkdir -p "$dir"; \
         chown -R "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$dir"; \
     done
 
@@ -81,18 +81,18 @@ RUN set -eux; \
 RUN set -eux; \
     { \
         echo '<FilesMatch \.php$>'; \
-    		echo '\tSetHandler application/x-httpd-php'; \
-    		echo '</FilesMatch>'; \
-    		echo; \
-    		echo 'DirectoryIndex disabled'; \
-    		echo 'DirectoryIndex index.php index.html'; \
-    		echo; \
-    		echo '<Directory /var/www/>'; \
-    		echo '\tOptions -Indexes'; \
-    		echo '\tAllowOverride All'; \
-    		echo '</Directory>'; \
-	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf"; \
-	a2enconf docker-php
+        echo '\tSetHandler application/x-httpd-php'; \
+        echo '</FilesMatch>'; \
+        echo; \
+        echo 'DirectoryIndex disabled'; \
+        echo 'DirectoryIndex index.php index.html'; \
+        echo; \
+        echo '<Directory /var/www/>'; \
+        echo '\tOptions -Indexes'; \
+        echo '\tAllowOverride All'; \
+        echo '</Directory>'; \
+  } | tee "$APACHE_CONFDIR/conf-available/docker-php.conf"; \
+  a2enconf docker-php
 
 # logs should go to stdout / stderr
 RUN set -eux;\
@@ -122,44 +122,44 @@ RUN set -eux; \
     curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz
 
 ENV PHP_BUILD_DEPS \
-		libcurl4-openssl-dev \
-		libreadline6-dev \
-		librecode-dev \
-		libsqlite3-dev \
-		libssl-dev \
-		libxml2-dev \
-		libicu-dev \
-		libbz2-dev \
-		libxslt-dev \
-		libedit-dev \
+    libcurl4-openssl-dev \
+    libreadline6-dev \
+    librecode-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    libxml2-dev \
+    libicu-dev \
+    libbz2-dev \
+    libxslt-dev \
+    libedit-dev \
     apache2-dev \
-		libzip-dev \
-		zlib1g-dev \
-		libsodium-dev
+    libzip-dev \
+    zlib1g-dev \
+    libsodium-dev
 
 RUN set -eux; \
     apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends; \
 ##<argon2>##
-		sed -e 's/stretch/buster/g' /etc/apt/sources.list > /etc/apt/sources.list.d/buster.list; \
-		{ \
-				echo 'Package: *'; \
-				echo 'Pin: release n=buster'; \
-				echo 'Pin-Priority: -10'; \
-				echo; \
-				echo 'Package: libargon2*'; \
-				echo 'Pin: release n=buster'; \
-				echo 'Pin-Priority: 990'; \
-		} > /etc/apt/preferences.d/argon2-buster; \
-		apt-get update; \
-		apt-get install -y --no-install-recommends libargon2-dev; \
+    sed -e 's/stretch/buster/g' /etc/apt/sources.list > /etc/apt/sources.list.d/buster.list; \
+    { \
+        echo 'Package: *'; \
+        echo 'Pin: release n=buster'; \
+        echo 'Pin-Priority: -10'; \
+        echo; \
+        echo 'Package: libargon2*'; \
+        echo 'Pin: release n=buster'; \
+        echo 'Pin-Priority: 990'; \
+    } > /etc/apt/preferences.d/argon2-buster; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends libargon2-dev; \
 ##</argon2>##
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \
     export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS"; \
     . "$APACHE_ENVVARS"; \
     if [ ! -d /usr/include/curl ]; then \
-				ln -sT /usr/include/x86_64-linux-gnu/curl /usr/local/include/curl; \
-	  fi; \
+        ln -sT /usr/include/x86_64-linux-gnu/curl /usr/local/include/curl; \
+    fi; \
     docker-php-source extract; \
     cd /usr/src/php; \
     ./configure \
@@ -176,7 +176,7 @@ RUN set -eux; \
         --enable-fileinfo \
         --enable-filter \
         --enable-ftp \
-				--with-libedit \
+        --with-libedit \
         --with-mhash \
         --with-iconv \
         --enable-intl \
@@ -187,7 +187,7 @@ RUN set -eux; \
         --with-mysqli=mysqlnd \
         --enable-mysqlnd \
         --with-password-argon2 \
-				--with-sodium \
+        --with-sodium \
         --with-openssl \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
@@ -213,8 +213,8 @@ RUN set -eux; \
     docker-php-source delete; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS; \
 # https://github.com/docker-library/php/issues/443
-		pecl update-channels; \
-		rm -rf /tmp/pear ~/.pearrc
+    pecl update-channels; \
+    rm -rf /tmp/pear ~/.pearrc
 
 COPY docker-php-* /usr/local/bin/
 
