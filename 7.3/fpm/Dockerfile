@@ -58,6 +58,7 @@ RUN set -xe \
         libicu-dev \
         libbz2-dev \
         libxslt-dev \
+        libzip-dev \
     " \
     && apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends \
     && apt-get clean \

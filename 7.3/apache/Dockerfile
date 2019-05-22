@@ -117,6 +117,7 @@ RUN set -xe \
         libbz2-dev \
         libxslt-dev \
         apache2-dev \
+        libzip-dev \
     " \
     && apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends \
     && apt-get clean \
