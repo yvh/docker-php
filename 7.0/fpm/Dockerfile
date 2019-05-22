@@ -1,9 +1,19 @@
-FROM debian:stretch
+FROM debian:stretch-slim
 LABEL maintainer="Yannick Vanhaeren"
+
+# prevent Debian's PHP packages from being installed
+# https://github.com/docker-library/php/pull/542
+RUN set -eux; \
+    { \
+        echo 'Package: php*'; \
+        echo 'Pin: release *'; \
+        echo 'Pin-Priority: -1'; \
+    } > /etc/apt/preferences.d/no-debian-php
 
 # persistent / runtime deps
 ENV PHPIZE_DEPS \
     autoconf \
+    dpkg-dev \
     file \
     g++ \
     gcc \
@@ -12,7 +22,8 @@ ENV PHPIZE_DEPS \
     pkg-config \
     re2c
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends \
         $PHPIZE_DEPS \
         ca-certificates \
         curl \
@@ -20,15 +31,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-libmysqlclient-dev \
         libsqlite3-0 \
         libxml2 \
+        libzip4 \
+        libedit2 \
+        libsodium18 \
         xz-utils \
         libicu57 \
         libbz2-1.0 \
-        libxslt1.1 \
-    && apt-get clean \
-    && rm -r /var/lib/apt/lists/*
+        libxslt1.1; \
+    apt-get clean; \
+    rm -r /var/lib/apt/lists/*
 
 ENV PHP_INI_DIR /usr/local/etc/php
-RUN mkdir -p $PHP_INI_DIR/conf.d
+RUN set -eux; \
+    mkdir -p $PHP_INI_DIR/conf.d
 
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
@@ -43,34 +58,39 @@ ENV PHP_VERSION 7.0.33
 
 COPY docker-php-source /usr/local/bin/
 
-RUN set -xe \
-    && cd /usr/src \
-    && curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz
+RUN set -eux; \
+    cd /usr/src; \
+    curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz
 
-RUN set -xe \
-    && PHP_BUILD_DEPS=" \
-        libcurl4-openssl-dev \
-        libreadline6-dev \
-        librecode-dev \
-        libsqlite3-dev \
-        libssl-dev \
-        libxml2-dev \
-        libicu-dev \
-        libbz2-dev \
-        libxslt-dev \
-    " \
-    && apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && export CFLAGS="$PHP_CFLAGS" \
-    CPPFLAGS="$PHP_CPPFLAGS" \
-    LDFLAGS="$PHP_LDFLAGS" \
-    && ln -s  /usr/include/x86_64-linux-gnu/curl  /usr/include/curl \
-    && docker-php-source extract \
-    && cd /usr/src/php \
-    && ./configure \
+ENV PHP_BUILD_DEPS \
+    libcurl4-openssl-dev \
+    libreadline6-dev \
+    librecode-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    libxml2-dev \
+    libicu-dev \
+    libbz2-dev \
+    libxslt-dev \
+    libedit-dev \
+    libzip-dev \
+    zlib1g-dev \
+    libsodium-dev
+
+RUN set -eux; \
+    apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*; \
+    export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS"; \
+    if [ ! -d /usr/include/curl ]; then \
+        ln -sT /usr/include/x86_64-linux-gnu/curl /usr/local/include/curl; \
+    fi; \
+    docker-php-source extract; \
+    cd /usr/src/php; \
+    ./configure \
         --with-config-file-path="$PHP_INI_DIR" \
         --with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
+        --enable-option-checking=fatal \
         --enable-fpm \
         --with-fpm-user=www-data \
         --with-fpm-group=www-data \
@@ -82,6 +102,8 @@ RUN set -xe \
         --enable-dom \
         --enable-fileinfo \
         --enable-filter \
+        --enable-ftp \
+        --with-libedit \
         --with-mhash \
         --with-iconv \
         --enable-intl \
@@ -89,9 +111,9 @@ RUN set -xe \
         --enable-libxml \
         --enable-mbstring \
         --enable-mbregex \
-        --with-mysql \
         --with-mysqli=mysqlnd \
         --enable-mysqlnd \
+        --with-sodium \
         --with-openssl \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
@@ -108,21 +130,25 @@ RUN set -xe \
         --with-xsl \
         --enable-zip \
         --with-zlib \
-        --with-readline \
-    && make -j"$(nproc)" \
-    && make install \
-    && { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
-    && make clean \
-    && docker-php-source delete \
-    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS
+        --with-readline; \
+    make -j"$(nproc)"; \
+    make install; \
+    { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; }; \
+    make clean; \
+    cp /usr/src/php/php.ini-production /usr/local/etc/php/php.ini; \
+    docker-php-source delete; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS; \
+# https://github.com/docker-library/php/issues/443
+    pecl update-channels; \
+    rm -rf /tmp/pear ~/.pearrc
 
 COPY docker-php-* /usr/local/bin/
 
 WORKDIR /var/www/html
 
-RUN set -xe \
-    && cd /usr/local/etc \
-    && if [ -d php-fpm.d ]; then \
+RUN set -eux; \
+    cd /usr/local/etc; \
+    if [ -d php-fpm.d ]; then \
         # for some reason, upstream's php-fpm.conf.default has "include=NONE/etc/php-fpm.d/*.conf"
         sed 's!=NONE/!=!g' php-fpm.conf.default | tee php-fpm.conf > /dev/null; \
         cp php-fpm.d/www.conf.default php-fpm.d/www.conf; \
@@ -134,8 +160,8 @@ RUN set -xe \
           echo '[global]'; \
           echo 'include=etc/php-fpm.d/*.conf'; \
         } | tee php-fpm.conf; \
-    fi \
-    && { \
+    fi; \
+    { \
         echo '[global]'; \
         echo 'error_log = /proc/self/fd/2'; \
         echo; \
@@ -145,8 +171,8 @@ RUN set -xe \
         echo; \
         echo '; Ensure worker stdout and stderr are sent to the main error log.'; \
         echo 'catch_workers_output = yes'; \
-    } | tee php-fpm.d/docker.conf \
-    && { \
+    } | tee php-fpm.d/docker.conf; \
+    { \
         echo '[global]'; \
         echo 'daemonize = no'; \
         echo; \
