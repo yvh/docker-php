@@ -90,7 +90,7 @@ RUN mkdir -p $PHP_INI_DIR/conf.d
 
 # compile openssl, otherwise --with-openssl won't work
 RUN set -ex \
-    && OPENSSL_VERSION="1.0.2o" \
+    && OPENSSL_VERSION="1.0.2r" \
     && cd /tmp \
     && mkdir openssl \
     && curl -SsL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
