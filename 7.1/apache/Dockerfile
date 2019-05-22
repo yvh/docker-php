@@ -97,7 +97,7 @@ RUN mkdir -p $PHP_INI_DIR/conf.d
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-ENV PHP_VERSION 7.1.17
+ENV PHP_VERSION 7.1.29
 
 COPY docker-php-source /usr/local/bin/
 
