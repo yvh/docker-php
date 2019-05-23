@@ -139,20 +139,6 @@ ENV PHP_BUILD_DEPS \
 
 RUN set -eux; \
     apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends; \
-##<argon2>##
-    sed -e 's/stretch/buster/g' /etc/apt/sources.list > /etc/apt/sources.list.d/buster.list; \
-    { \
-        echo 'Package: *'; \
-        echo 'Pin: release n=buster'; \
-        echo 'Pin-Priority: -10'; \
-        echo; \
-        echo 'Package: libargon2*'; \
-        echo 'Pin: release n=buster'; \
-        echo 'Pin-Priority: 990'; \
-    } > /etc/apt/preferences.d/argon2-buster; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends libargon2-dev; \
-##</argon2>##
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \
     export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS"; \
@@ -186,8 +172,6 @@ RUN set -eux; \
         --enable-mbregex \
         --with-mysqli=mysqlnd \
         --enable-mysqlnd \
-        --with-password-argon2 \
-        --with-sodium \
         --with-openssl \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
@@ -210,13 +194,18 @@ RUN set -eux; \
     { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; }; \
     make clean; \
     cp /usr/src/php/php.ini-production /usr/local/etc/php/php.ini; \
-    docker-php-source delete; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS; \
 # https://github.com/docker-library/php/issues/443
     pecl update-channels; \
-    rm -rf /tmp/pear ~/.pearrc
+    pecl install -f libsodium; \
+    pecl clear-cache; \
+    rm -rf /tmp/pear ~/.pearrc; \
+    docker-php-source delete; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS
 
 COPY docker-php-* /usr/local/bin/
+
+RUN set -eux; \
+    docker-php-ext-enable sodium
 
 COPY apache2-foreground /usr/local/bin/
 WORKDIR /var/www/html

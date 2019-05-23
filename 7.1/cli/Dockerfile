@@ -110,7 +110,6 @@ RUN set -eux; \
         --enable-mbregex \
         --with-mysqli=mysqlnd \
         --enable-mysqlnd \
-        --with-sodium \
         --with-openssl \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
@@ -133,12 +132,17 @@ RUN set -eux; \
     { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; }; \
     make clean; \
     cp /usr/src/php/php.ini-production /usr/local/etc/php/php.ini; \
-    docker-php-source delete; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS; \
 # https://github.com/docker-library/php/issues/443
     pecl update-channels; \
-    rm -rf /tmp/pear ~/.pearrc
+    pecl install -f libsodium; \
+    pecl clear-cache; \
+    rm -rf /tmp/pear ~/.pearrc; \
+    docker-php-source delete; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS
 
 COPY docker-php-* /usr/local/bin/
+
+RUN set -eux; \
+    docker-php-ext-enable sodium
 
 CMD ["php", "-a"]
