@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:jessie-slim
 LABEL maintainer="Yannick Vanhaeren"
 
 # prevent Debian's PHP packages from being installed
