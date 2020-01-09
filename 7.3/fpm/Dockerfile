@@ -29,7 +29,6 @@ RUN set -eux; \
         $PHPIZE_DEPS \
         ca-certificates \
         curl \
-        librecode0 \
         default-libmysqlclient-dev \
         libsqlite3-0 \
         libxml2 \
@@ -68,7 +67,6 @@ RUN set -eux; \
 ENV PHP_BUILD_DEPS \
     libcurl4-openssl-dev \
     libreadline6-dev \
-    librecode-dev \
     libsqlite3-dev \
     libssl-dev \
     libxml2-dev \
@@ -125,7 +123,6 @@ RUN set -eux; \
         --with-pdo-sqlite \
         --enable-phar \
         --enable-posix \
-        --with-recode \
         --enable-simplexml \
         --enable-soap \
         --enable-sockets \
