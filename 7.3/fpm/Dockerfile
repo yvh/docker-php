@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:buster-slim
 LABEL maintainer="Yannick Vanhaeren"
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -39,7 +39,8 @@ RUN set -eux; \
         xz-utils \
         libicu57 \
         libbz2-1.0 \
-        libxslt1.1; \
+        libxslt1.1 \
+        libargon2-1; \
     apt-get clean; \
     rm -r /var/lib/apt/lists/*
 
@@ -56,7 +57,7 @@ RUN set -eux; \
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-ENV PHP_VERSION 7.3.5
+ENV PHP_VERSION 7.3.13
 
 COPY docker-php-source /usr/local/bin/
 
@@ -77,24 +78,11 @@ ENV PHP_BUILD_DEPS \
     libedit-dev \
     libzip-dev \
     zlib1g-dev \
-    libsodium-dev
+    libsodium-dev \
+    libargon2-dev
 
 RUN set -eux; \
     apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends; \
-##<argon2>##
-    sed -e 's/stretch/buster/g' /etc/apt/sources.list > /etc/apt/sources.list.d/buster.list; \
-    { \
-        echo 'Package: *'; \
-        echo 'Pin: release n=buster'; \
-        echo 'Pin-Priority: -10'; \
-        echo; \
-        echo 'Package: libargon2*'; \
-        echo 'Pin: release n=buster'; \
-        echo 'Pin-Priority: 990'; \
-    } > /etc/apt/preferences.d/argon2-buster; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends libargon2-dev; \
-##</argon2>##
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \
     export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS"; \
