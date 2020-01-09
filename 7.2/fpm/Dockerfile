@@ -56,7 +56,7 @@ RUN set -eux; \
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-ENV PHP_VERSION 7.2.18
+ENV PHP_VERSION 7.2.26
 
 COPY docker-php-source /usr/local/bin/
 
