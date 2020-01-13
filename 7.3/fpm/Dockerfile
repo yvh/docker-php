@@ -34,9 +34,9 @@ RUN set -eux; \
         libxml2 \
         libzip4 \
         libedit2 \
-        libsodium18 \
+        libsodium23 \
         xz-utils \
-        libicu57 \
+        libicu63 \
         libbz2-1.0 \
         libxslt1.1 \
         libargon2-1; \
