@@ -29,8 +29,6 @@ RUN set -eux; \
         $PHPIZE_DEPS \
         ca-certificates \
         curl \
-        librecode0 \
-        default-libmysqlclient-dev \
         libsqlite3-0 \
         libxml2 \
         libzip4 \
@@ -39,7 +37,11 @@ RUN set -eux; \
         xz-utils \
         libicu57 \
         libbz2-1.0 \
-        libxslt1.1; \
+        libxslt1.1 \
+        libfreetype6 \
+        libjpeg62-turbo \
+        libpng16-16 \
+        libwebp6; \
     apt-get clean; \
     rm -r /var/lib/apt/lists/*
 
@@ -53,12 +55,12 @@ RUN set -eux; \
 # Enable linker optimization (this sorts the hash buckets to improve cache locality, and is non-default)
 # Adds GNU HASH segments to generated executables (this is used if present, and is much faster than sysv hash; in this configuration, sysv hash is also generated)
 # https://github.com/docker-library/php/issues/272
-ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
+ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 ENV PHP_VERSION 7.2.26
 
-COPY docker-php-source /usr/local/bin/
+COPY docker-php-* /usr/local/bin/
 
 RUN set -eux; \
     cd /usr/src; \
@@ -67,7 +69,6 @@ RUN set -eux; \
 ENV PHP_BUILD_DEPS \
     libcurl4-openssl-dev \
     libreadline6-dev \
-    librecode-dev \
     libsqlite3-dev \
     libssl-dev \
     libxml2-dev \
@@ -77,7 +78,12 @@ ENV PHP_BUILD_DEPS \
     libedit-dev \
     libzip-dev \
     zlib1g-dev \
-    libsodium-dev
+    libsodium-dev \
+    default-libmysqlclient-dev \
+    libfreetype6-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libwebp-dev
 
 RUN set -eux; \
     apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends; \
@@ -101,9 +107,12 @@ RUN set -eux; \
     if [ ! -d /usr/include/curl ]; then \
         ln -sT /usr/include/x86_64-linux-gnu/curl /usr/local/include/curl; \
     fi; \
+    ln -s /usr/include/freetype2 /usr/include/freetype2/freetype; \
     docker-php-source extract; \
     cd /usr/src/php; \
+    gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
     ./configure \
+        --build="$gnuArch" \
         --with-config-file-path="$PHP_INI_DIR" \
         --with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
         --enable-option-checking=fatal \
@@ -135,31 +144,40 @@ RUN set -eux; \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
         --with-pdo-sqlite \
+        --with-sqlite3 \
+        --with-gd \
+        --with-jpeg-dir=/usr/lib/x86_64-linux-gnu \
+        --with-png-dir=/usr/lib/x86_64-linux-gnu \
+        --with-freetype-dir=/usr/lib/x86_64-linux-gnu \
+        --with-webp-dir=/usr/lib/x86_64-linux-gnu \
+        --enable-exif \
         --enable-phar \
         --enable-posix \
-        --with-recode \
         --enable-simplexml \
         --enable-soap \
         --enable-sockets \
-        --with-sqlite3 \
         --enable-tokenizer \
         --enable-xml \
         --with-xsl \
         --enable-zip \
         --with-zlib \
-        --with-readline; \
+        --with-readline \
+        --enable-opcache; \
     make -j"$(nproc)"; \
     make install; \
     { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; }; \
     make clean; \
     cp /usr/src/php/php.ini-production /usr/local/etc/php/php.ini; \
+    docker-php-ext-enable opcache; \
     docker-php-source delete; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $PHP_BUILD_DEPS; \
 # https://github.com/docker-library/php/issues/443
     pecl update-channels; \
-    rm -rf /tmp/pear ~/.pearrc
+    rm -rf /tmp/pear ~/.pearrc; \
+# smoke test
+    php --version
 
-COPY docker-php-* /usr/local/bin/
+ENTRYPOINT ["docker-php-entrypoint"]
 
 WORKDIR /var/www/html
 
@@ -196,6 +214,10 @@ RUN set -eux; \
         echo '[www]'; \
         echo 'listen = 9000'; \
     } | tee php-fpm.d/zz-docker.conf
+
+# Override stop signal to stop process gracefully
+# https://github.com/php/php-src/blob/17baa87faddc2550def3ae7314236826bc1b1398/sapi/fpm/php-fpm.8.in#L163
+STOPSIGNAL SIGQUIT
 
 EXPOSE 9000
 CMD ["php-fpm"]
