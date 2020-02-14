@@ -6,4 +6,36 @@ if [ "${1#-}" != "$1" ]; then
 	set -- php-fpm "$@"
 fi
 
+OLD_PWD=${PWD}
+mkdir -p /opt/docker/
+cd /opt/docker/
+CONTAINER_ALREADY_STARTED=".docker-already-started"
+
+if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
+  touch $CONTAINER_ALREADY_STARTED
+
+	if [ $INSTALL_WP_CLI = true ]; then
+		curl -sSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /usr/local/bin/wp
+		chmod +x /usr/local/bin/wp
+	fi
+
+	if [ $INSTALL_COMPOSER = true ]; then
+		EXPECTED_CHECKSUM="$(curl -sS https://composer.github.io/installer.sig)"
+		php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+		ACTUAL_CHECKSUM="$(php -r "echo hash_file('sha384', 'composer-setup.php');")"
+
+		if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]
+		then
+		    >&2 echo 'ERROR: Invalid installer checksum'
+		    rm composer-setup.php
+		    exit 1
+		fi
+
+		php composer-setup.php --quiet --install-dir=/usr/local/bin/ --filename=composer
+		rm composer-setup.php
+	fi
+fi
+
+cd ${OLD_PWD}
+
 exec "$@"
