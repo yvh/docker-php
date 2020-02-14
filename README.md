@@ -36,6 +36,16 @@ See repository on [Docker Hub](https://hub.docker.com/repository/docker/yannickv
 
 Same use as the [official PHP docker image](https://hub.docker.com/_/php/) but replace `php` image by `yannickvh/php`
 
+## Additional environment Variables
+
+`INSTALL_WP_CLI`  
+
+Install the last version of wp-cli
+
+`INSTALL_COMPOSER`
+
+Install the last version of composer
+
 # User Feedback
 
 ## Issues
