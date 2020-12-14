@@ -117,8 +117,8 @@ RUN set -eux; \
 # https://github.com/docker-library/php/issues/272
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
-ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-ENV PHP_VERSION 7.4.13
+ENV PHP_LDFLAGS="-Wl,-O1 -pie"
+ENV PHP_VERSION 8.0.0
 
 COPY docker-php-* /usr/local/bin/
 
@@ -180,7 +180,6 @@ RUN set -eux; \
         --with-mhash \
         --with-iconv \
         --enable-intl \
-        --enable-json \
         --with-libxml \
         --enable-mbstring \
         --enable-mbregex \
@@ -213,6 +212,7 @@ RUN set -eux; \
         --with-readline \
         --enable-opcache; \
     make -j"$(nproc)"; \
+    find -type f -name '*.a' -delete; \
     make install; \
     { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; }; \
     make clean; \
