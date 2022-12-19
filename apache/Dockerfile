@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 LABEL maintainer="Yannick Vanhaeren"
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -34,7 +34,7 @@ RUN set -eux; \
         libzip4 \
         libsodium23 \
         xz-utils \
-        libicu63 \
+        libicu67 \
         libbz2-1.0 \
         libxslt1.1 \
         apache2-bin \
@@ -118,7 +118,7 @@ RUN set -eux; \
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
-ENV PHP_VERSION 8.1.13
+ENV PHP_VERSION 8.2.0
 
 COPY docker-php-* /usr/local/bin/
 
