@@ -10,14 +10,14 @@ ARG OS_PHP_DEPS
 
 # prevent Debian's PHP packages from being installed
 # https://github.com/docker-library/php/pull/542
-RUN set -eux; \
+RUN set -e; \
     { \
         echo 'Package: php*'; \
         echo 'Pin: release *'; \
         echo 'Pin-Priority: -1'; \
     } > /etc/apt/preferences.d/no-debian-php
 
-RUN set -eux; \
+RUN set -e; \
     apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
         dpkg-dev \
@@ -47,7 +47,7 @@ RUN set -eux; \
     rm -r /var/lib/apt/lists/*
 
 ENV PHP_INI_DIR /usr/local/etc/php
-RUN set -eux; \
+RUN set -e; \
     mkdir -p $PHP_INI_DIR/conf.d
 
 # Apply stack smash protection to functions using local buffers and alloca()
@@ -63,7 +63,7 @@ ENV PHP_VERSION=$PHP_VERSION
 
 COPY docker-php-* /usr/local/bin/
 
-RUN set -eux; \
+RUN set -e; \
     cd /usr/src; \
     curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz
 
@@ -87,7 +87,7 @@ ENV PHP_BUILD_DEPS \
     libpng-dev \
     libwebp-dev
 
-RUN set -eux; \
+RUN set -e; \
     apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \

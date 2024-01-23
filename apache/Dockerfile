@@ -10,14 +10,14 @@ ARG OS_PHP_DEPS
 
 # prevent Debian's PHP packages from being installed
 # https://github.com/docker-library/php/pull/542
-RUN set -eux; \
+RUN set -e; \
     { \
         echo 'Package: php*'; \
         echo 'Pin: release *'; \
         echo 'Pin-Priority: -1'; \
     } > /etc/apt/preferences.d/no-debian-php
 
-RUN set -eux; \
+RUN set -e; \
     apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
         dpkg-dev \
@@ -51,7 +51,7 @@ RUN set -eux; \
 ENV APACHE_CONFDIR /etc/apache2
 ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
 
-RUN set -eux; \
+RUN set -e; \
     \
 # generically convert lines like
 #   export APACHE_RUN_USER=www-data
@@ -75,15 +75,15 @@ RUN set -eux; \
     done
 
 # Apache + PHP requires preforking Apache for best results
-RUN set -eux; \
+RUN set -e; \
     a2dismod mpm_event; \
     a2enmod mpm_prefork rewrite
 
-RUN set -eux; \
+RUN set -e; \
     echo "ServerName localhost" > /etc/apache2/conf-available/fqdn.conf; \
     a2enconf fqdn
 
-RUN set -eux; \
+RUN set -e; \
     { \
         echo '<FilesMatch \.php$>'; \
         echo '\tSetHandler application/x-httpd-php'; \
@@ -100,13 +100,13 @@ RUN set -eux; \
   a2enconf docker-php
 
 # logs should go to stdout / stderr
-RUN set -eux;\
+RUN set -e;\
     . "$APACHE_ENVVARS"; \
     ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log"; \
     ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log"
 
 ENV PHP_INI_DIR /usr/local/etc/php
-RUN set -eux; \
+RUN set -e; \
     mkdir -p $PHP_INI_DIR/conf.d
 
 # Apply stack smash protection to functions using local buffers and alloca()
@@ -122,7 +122,7 @@ ENV PHP_VERSION=$PHP_VERSION
 
 COPY docker-php-* /usr/local/bin/
 
-RUN set -eux; \
+RUN set -e; \
     cd /usr/src; \
     curl -SsL "https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz
 
@@ -147,7 +147,7 @@ ENV PHP_BUILD_DEPS \
     libpng-dev \
     libwebp-dev
 
-RUN set -eux; \
+RUN set -e; \
     apt-get update && apt-get install -y $PHP_BUILD_DEPS --no-install-recommends; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \
