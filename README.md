@@ -6,6 +6,7 @@ See repository on [Docker Hub](https://hub.docker.com/r/yannickvh/php)
 
 # Supported tags
 
+- `8.4-apache`, `8.4-cli`, `8.4-fpm`
 - `8.3-apache`, `8.3-cli`, `8.3-fpm`
 - `8.2-apache`, `8.2-cli`, `8.2-fpm`
 - `8.1-apache`, `8.1-cli`, `8.1-fpm`
